@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <functional>
 #include <geometry_msgs/msg/twist.hpp>
+#include <rclcpp/callback_group.hpp>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 
@@ -14,9 +16,16 @@ class Patrol : public rclcpp::Node {
 public:
   Patrol() : Node("patrol_node") {
 
+    reentrant_group_1_ =
+        this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+
+    rclcpp::SubscriptionOptions sub_options;
+    sub_options.callback_group = reentrant_group_1_;
+
     // Subscribers
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
-        "/scan", 10, std::bind(&Patrol::laserscan_callback, this, _1));
+        "/scan", 10, std::bind(&Patrol::laserscan_callback, this, _1),
+        sub_options);
 
     // Publishers
     cmd_vel_publisher_ =
@@ -24,7 +33,8 @@ public:
 
     // Timer for control loop  (10Hz)
     control_timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(100), std::bind(&Patrol::control_loop, this));
+        std::chrono::milliseconds(100), std::bind(&Patrol::control_loop, this),
+        reentrant_group_1_);
 
     RCLCPP_INFO(this->get_logger(), "Patrol Node initialized and ready!");
   }
@@ -39,9 +49,10 @@ private:
   void laserscan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     // We have lasercan from -pi to pi with 100 ranges on Simulation
 
-    size_t front_idx = std::round(
-        (-msg->angle_min) / msg->angle_increment); // Front IDx (angle ~0.0 rad)
-    const double front_con_rad = 20.0 * M_PI / 180; // 20 degrees front
+    size_t front_idx =
+        std::round((msg->angle_max - msg->angle_min) /
+                   (2 * msg->angle_increment));   // Front IDx (angle ~0.0 rad)
+    const double front_con_rad = 60 * M_PI / 180; // 60 degrees front
     size_t cone_rays = std::round(front_con_rad / msg->angle_increment);
     size_t front_start_idx = front_idx - cone_rays / 2;
     size_t front_end_idx = front_idx + cone_rays / 2 + 1;
@@ -91,6 +102,7 @@ private:
   }
 
 private:
+  rclcpp::CallbackGroup::SharedPtr reentrant_group_1_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr
       scan_subscription_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
@@ -114,8 +126,17 @@ int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   patrol_node = std::make_shared<Patrol>();
   std::signal(SIGINT, signal_handler);
-  //   std::signal(SIGTERM, signal_handler); // System term (e.g., kill)
-  rclcpp::spin(patrol_node);
+  // Use MultiThreadedExecutor with 2 threads
+  rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(),
+                                                    2);
+  executor.add_node(patrol_node);
+
+  try {
+    executor.spin();
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(patrol_node->get_logger(), "Exception: %s", e.what());
+  }
+
   rclcpp::shutdown();
   return 0;
 }
