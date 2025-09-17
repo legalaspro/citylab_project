@@ -31,7 +31,7 @@ def generate_launch_description():
         name='rviz2_node',
         output='screen',
         emulate_tty=True,
-        parameters=[{'use_sim_time': True}],
+        parameters=[{'use_sim_time': False}],
         arguments=['-d', rviz_config_path],
     )
 
