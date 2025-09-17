@@ -41,7 +41,7 @@ private:
 
     size_t front_idx = std::round(
         (-msg->angle_min) / msg->angle_increment); // Front IDx (angle ~0.0 rad)
-    const double front_con_rad = 15.0 * M_PI / 180; // 15 degrees front
+    const double front_con_rad = 20.0 * M_PI / 180; // 20 degrees front
     size_t cone_rays = std::round(front_con_rad / msg->angle_increment);
     size_t front_start_idx = front_idx - cone_rays / 2;
     size_t front_end_idx = front_idx + cone_rays / 2 + 1;
