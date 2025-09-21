@@ -13,7 +13,6 @@ using std::placeholders::_1;
 class Patrol : public rclcpp::Node {
 public:
   Patrol() : Node("patrol_node") {
-
     // Subscribers
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan", 10, std::bind(&Patrol::laserscan_callback, this, _1));
@@ -104,6 +103,7 @@ private:
 std::shared_ptr<Patrol> patrol_node;
 
 void signal_handler(int signum) {
+  (void)signum;
   if (patrol_node) {
     patrol_node->stop();
   }
