@@ -38,19 +38,17 @@ private:
       return;
     }
 
-    const size_t front_idx = std::round((scan.angle_max - scan.angle_min) /
-                                        (2 * scan.angle_increment));
-
-    if (scan.ranges[front_idx] > min_detection_) {
+    if (min_front(scan) > min_detection_) {
       RCLCPP_DEBUG(this->get_logger(), "Send forward");
       response->direction = "forward";
+      return;
     }
 
     // Indices covering [-pi/2, pi/2]
     const size_t right_idx =
-        std::round((-M_PI_2 - scan.angle_min) / scan.angle_increment);
+        std::ceil((-M_PI_2 - scan.angle_min) / scan.angle_increment);
     const size_t left_idx =
-        std::round((M_PI_2 - scan.angle_min) / scan.angle_increment);
+        std::floor((M_PI_2 - scan.angle_min) / scan.angle_increment) + 1;
     // Split in 3 sections
     size_t total = left_idx - right_idx;
     size_t section = total / 3;
@@ -78,6 +76,20 @@ private:
       RCLCPP_DEBUG(this->get_logger(), "Send  right");
       response->direction = "right";
     }
+  }
+
+  float min_front(const sensor_msgs::msg::LaserScan &scan,
+                  double half_deg = 10.0) {
+    const double half = half_deg * M_PI / 180.0;
+    const size_t right_idx =
+        std::ceil((-half - scan.angle_min) / scan.angle_increment);
+    const size_t left_idx =
+        std::floor((half - scan.angle_min) / scan.angle_increment) + 1;
+    float min_val = std::numeric_limits<float>::infinity();
+    for (auto i = right_idx; i < left_idx; ++i) {
+      min_val = std::min(min_val, scan.ranges[i]);
+    }
+    return min_val;
   }
 };
 

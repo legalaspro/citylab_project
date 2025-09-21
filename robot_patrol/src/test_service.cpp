@@ -32,6 +32,7 @@ public:
                   "Service %s not available, waiting again...",
                   name_service.c_str());
     }
+    RCLCPP_INFO(this->get_logger(), "Test Client started...");
   }
 
 private:
