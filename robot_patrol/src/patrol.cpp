@@ -116,6 +116,7 @@ private:
 std::shared_ptr<Patrol> patrol_node;
 
 void signal_handler(int signum) {
+  (void)signum;
   if (patrol_node) {
     patrol_node->stop();
   }

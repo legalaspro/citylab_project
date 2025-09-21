@@ -10,17 +10,51 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
+rosidl_generate_interfaces(${PROJECT_NAME}
+	"srv/GetDirection.srv"
+	DEPENDENCIES sensor_msgs)
+
+# Add executables
 add_executable(patrol_executable src/patrol.cpp)
+add_executable(direction_service_executable src/direction_service.cpp)
+add_executable(test_service_executable src/test_service.cpp)
+add_executable(test_service_executable2 src/test_service2.cpp)
+add_executable(patrol_with_service_executable src/patrol_with_service.cpp)
 
+# Link dependencies
 ament_target_dependencies(patrol_executable
 	rclcpp
 	sensor_msgs
 	geometry_msgs)
+ament_target_dependencies(direction_service_executable
+	rclcpp)
+# Get the typesupport target and link it (adds include dirs + build order)
+rosidl_get_typesupport_target(cpp_typesupport_target
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(direction_service_executable ${cpp_typesupport_target})
+ament_target_dependencies(test_service_executable
+	rclcpp
+	sensor_msgs)
+target_link_libraries(test_service_executable ${cpp_typesupport_target})
+ament_target_dependencies(test_service_executable2
+	rclcpp
+	sensor_msgs)
+target_link_libraries(test_service_executable2 ${cpp_typesupport_target})
+ament_target_dependencies(patrol_with_service_executable
+	rclcpp
+	sensor_msgs
+	geometry_msgs)
+target_link_libraries(patrol_with_service_executable ${cpp_typesupport_target})
 
 #Install executables
 install(TARGETS
 	patrol_executable
+	direction_service_executable
+	test_service_executable
+	test_service_executable2
+	patrol_with_service_executable
 	DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files 
@@ -41,5 +75,6 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
 
 ament_package()
