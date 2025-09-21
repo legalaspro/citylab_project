@@ -21,6 +21,7 @@ add_executable(patrol_executable src/patrol.cpp)
 add_executable(direction_service_executable src/direction_service.cpp)
 add_executable(test_service_executable src/test_service.cpp)
 add_executable(test_service_executable2 src/test_service2.cpp)
+add_executable(patrol_with_service_executable src/patrol_with_service.cpp)
 
 # Link dependencies
 ament_target_dependencies(patrol_executable
@@ -41,6 +42,11 @@ ament_target_dependencies(test_service_executable2
 	rclcpp
 	sensor_msgs)
 target_link_libraries(test_service_executable2 ${cpp_typesupport_target})
+ament_target_dependencies(patrol_with_service_executable
+	rclcpp
+	sensor_msgs
+	geometry_msgs)
+target_link_libraries(patrol_with_service_executable ${cpp_typesupport_target})
 
 #Install executables
 install(TARGETS
@@ -48,6 +54,7 @@ install(TARGETS
 	direction_service_executable
 	test_service_executable
 	test_service_executable2
+	patrol_with_service_executable
 	DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files 
