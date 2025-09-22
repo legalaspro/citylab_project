@@ -8,13 +8,18 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(action_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
 	"srv/GetDirection.srv"
-	DEPENDENCIES sensor_msgs)
+	"action/GoToPose.action"
+	DEPENDENCIES sensor_msgs geometry_msgs)
 
 # Add executables
 add_executable(patrol_executable src/patrol.cpp)
@@ -22,6 +27,7 @@ add_executable(direction_service_executable src/direction_service.cpp)
 add_executable(test_service_executable src/test_service.cpp)
 add_executable(test_service_executable2 src/test_service2.cpp)
 add_executable(patrol_with_service_executable src/patrol_with_service.cpp)
+add_executable(go_to_pose_action_executable src/go_to_pose_action.cpp)
 
 # Link dependencies
 ament_target_dependencies(patrol_executable
@@ -47,6 +53,14 @@ ament_target_dependencies(patrol_with_service_executable
 	sensor_msgs
 	geometry_msgs)
 target_link_libraries(patrol_with_service_executable ${cpp_typesupport_target})
+ament_target_dependencies(go_to_pose_action_executable
+	rclcpp
+	rclcpp_action
+	nav_msgs
+	geometry_msgs
+	tf2)
+target_link_libraries(go_to_pose_action_executable ${cpp_typesupport_target})
+
 
 #Install executables
 install(TARGETS
@@ -55,6 +69,7 @@ install(TARGETS
 	test_service_executable
 	test_service_executable2
 	patrol_with_service_executable
+	go_to_pose_action_executable
 	DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files 
