@@ -39,7 +39,7 @@ private:
     }
 
     if (min_front(scan) > min_detection_) {
-      RCLCPP_DEBUG(this->get_logger(), "Send forward");
+      RCLCPP_INFO(this->get_logger(), "Send forward");
       response->direction = "forward";
       return;
     }
@@ -64,13 +64,13 @@ private:
 
     if (total_dist_sec_front >= total_dist_sec_right &&
         total_dist_sec_front >= total_dist_sec_left) {
-      RCLCPP_DEBUG(this->get_logger(), "Send  forward");
+      RCLCPP_INFO(this->get_logger(), "Send  forward");
       response->direction = "forward";
     } else if (total_dist_sec_left >= total_dist_sec_right) {
-      RCLCPP_DEBUG(this->get_logger(), "Send  left");
+      RCLCPP_INFO(this->get_logger(), "Send  left");
       response->direction = "left";
     } else {
-      RCLCPP_DEBUG(this->get_logger(), "Send  right");
+      RCLCPP_INFO(this->get_logger(), "Send  right");
       response->direction = "right";
     }
   }
