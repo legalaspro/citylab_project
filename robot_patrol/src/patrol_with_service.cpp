@@ -61,7 +61,7 @@ private:
   rclcpp::TimerBase::SharedPtr control_timer_;
   geometry_msgs::msg::Twist twist_;
   sensor_msgs::msg::LaserScan::SharedPtr scan_msg_;
-  const double min_detection_ = 0.35; // 35 cm to detect obstacle
+  const double min_detection_ = 0.55; // 55 cm to detect obstacle
   const float linear_vel_ = 0.1;      // linear velocity 0.1 m/sec
   const float angular_vel_ = 0.5;     // angular velocity 0.5 rad/sec
 

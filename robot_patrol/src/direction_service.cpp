@@ -23,7 +23,7 @@ public:
 
 private:
   rclcpp::Service<GetDirection>::SharedPtr service_;
-  const double min_detection_ = 0.35; // 35 cm to detect obstacle
+  const double min_detection_ = 0.55; // 55 cm to detect obstacle
 
   void
   get_direction_callback(const std::shared_ptr<GetDirection::Request> request,
@@ -58,12 +58,9 @@ private:
     auto front_end = right_end + section;               // end of front
     auto left_end = scan.ranges.begin() + left_idx + 1; // left
 
-    float total_dist_sec_right =
-        std::accumulate(right_begin, right_end, 0.0f); // right section
-    float total_dist_sec_front =
-        std::accumulate(right_end, front_end, 0.0f); // front section
-    float total_dist_sec_left =
-        std::accumulate(front_end, left_end, 0.0f); // left section
+    float total_dist_sec_right = sum_finite(right_begin, right_end);
+    float total_dist_sec_front = sum_finite(right_end, front_end);
+    float total_dist_sec_left = sum_finite(front_end, left_end);
 
     if (total_dist_sec_front >= total_dist_sec_right &&
         total_dist_sec_front >= total_dist_sec_left) {
@@ -76,6 +73,16 @@ private:
       RCLCPP_DEBUG(this->get_logger(), "Send  right");
       response->direction = "right";
     }
+  }
+
+  template <typename Iter> static float sum_finite(Iter first, Iter last) {
+    float sum = 0.0f;
+    for (; first != last; ++first) {
+      const float v = *first;
+      if (std::isfinite(v) && v > 0.0f)
+        sum += v;
+    }
+    return sum;
   }
 
   float min_front(const sensor_msgs::msg::LaserScan &scan,
