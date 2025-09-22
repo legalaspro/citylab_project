@@ -38,7 +38,7 @@ private:
       return;
     }
 
-    if (min_front(scan) > min_detection_) {
+    if (min_front(scan, 25.0) > min_detection_) {
       RCLCPP_INFO(this->get_logger(), "Send forward");
       response->direction = "forward";
       return;
