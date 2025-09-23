@@ -28,7 +28,7 @@ private:
   void
   get_direction_callback(const std::shared_ptr<GetDirection::Request> request,
                          std::shared_ptr<GetDirection::Response> response) {
-
+    RCLCPP_INFO(this->get_logger(), "Direction Service Requested");
     const auto &scan = request->laser_data;
     const size_t N = scan.ranges.size();
 
