@@ -76,7 +76,7 @@ private:
       return;
 
     // no obstacle detected
-    if (min_front(*scan_msg_) > min_detection_) {
+    if (min_front(*scan_msg_, 20.0) > min_detection_) {
       twist_.linear.x = linear_vel_;
       twist_.angular.z = 0.0;
       cmd_vel_publisher_->publish(twist_);
